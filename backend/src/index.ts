@@ -6,6 +6,16 @@ import csvToJson from "convert-csv-to-json";
 
 const commaCsvToJson = csvToJson.fieldDelimiter(",");
 
+type User = {
+  Name: string;
+  Email: string;
+  Age: string;
+  Country: string;
+  Occupation: string;
+};
+
+let dbObject: User[] = [];
+
 const storage = new HonoMemoryStorage({
   key: (c, file) => `${file.originalname}-${new Date().getTime()}`,
 });
@@ -33,9 +43,12 @@ app.post("/api/files", storage.single("file"), async (c) => {
     const rawCsv = Buffer.from(await file.arrayBuffer()).toString("utf-8");
     jsonContent = commaCsvToJson.csvStringToJson(rawCsv);
 
+    // this could be validated with Zod
+    dbObject = jsonContent as User[];
+
     return c.json({
       message: "The file was uploaded successfully",
-      content: jsonContent,
+      content: dbObject,
     });
   } catch (error) {
     return c.json({ message: "Error parsing CSV file" }, 500);
@@ -43,13 +56,20 @@ app.post("/api/files", storage.single("file"), async (c) => {
 });
 
 app.get("/api/users", ({ req, res, json }) => {
+  const searchTerm = req.query("q");
+
+  if (!searchTerm) {
+    return json(dbObject);
+  }
+
+  const result = dbObject.filter((user) => {
+    return user.Name.toLocaleLowerCase().includes(
+      searchTerm.toLocaleLowerCase()
+    );
+  });
+
   return json({
-    data: [
-      {
-        id: 1,
-        name: "John Doe",
-      },
-    ],
+    data: result,
   });
 });
 

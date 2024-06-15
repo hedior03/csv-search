@@ -8,11 +8,17 @@ importers:
 
   .: {}
 
-  apps/backend:
+  backend:
     dependencies:
+      '@hono-storage/memory':
+        specifier: ^0.0.12
+        version: 0.0.12(hono@4.4.6)
       '@hono/node-server':
         specifier: ^1.11.3
         version: 1.11.3
+      convert-csv-to-json:
+        specifier: ^2.47.0
+        version: 2.47.0
       hono:
         specifier: ^4.4.6
         version: 4.4.6
@@ -23,6 +29,8 @@ importers:
       tsx:
         specifier: ^4.7.1
         version: 4.15.5
+
+  frontend: {}
 
 packages:
 
@@ -233,6 +241,23 @@ packages:
     dev: true
     optional: true
 
+  /@hono-storage/core@0.0.13(hono@4.4.6):
+    resolution: {integrity: sha512-X9zFXHILAN6PZDTb+DKzFZuKb95cO7R0VUTvOEvwxCHjNuSBdMex8oiwnSRzguVZ7lhVSlf7x1VhaJuHoFTQow==}
+    peerDependencies:
+      hono: '>=3.8'
+    dependencies:
+      hono: 4.4.6
+    dev: false
+
+  /@hono-storage/memory@0.0.12(hono@4.4.6):
+    resolution: {integrity: sha512-q5EYb1dUcwFEN861cwSoJsGv1yUgflR8IAMRKPPe2bUQ0SnCpRuMEbYaiSXyk6R0K8k/a5K8sckTUY70DI+U7A==}
+    peerDependencies:
+      hono: '>=3.8'
+    dependencies:
+      '@hono-storage/core': 0.0.13(hono@4.4.6)
+      hono: 4.4.6
+    dev: false
+
   /@hono/node-server@1.11.3:
     resolution: {integrity: sha512-mFg3qlKkDtMWSalX5Gyh6Zd3MXay0biGobFlyJ49i6R1smBBS1CYkNZbvwLlw+4sSrHO4ZiH7kj4TcLpl2Jr3g==}
     engines: {node: '>=18.14.1'}
@@ -243,6 +268,10 @@ packages:
     dependencies:
       undici-types: 5.26.5
     dev: true
+
+  /convert-csv-to-json@2.47.0:
+    resolution: {integrity: sha512-84H15RZ4StyBWaa0Oo91PEsN1kIfS8O4XzPGqt/SPcCGvt6B9GoEOgCCebCe+ITkyxyUMtySbCvSM+h/p8QY4Q==}
+    dev: false
 
   /esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}

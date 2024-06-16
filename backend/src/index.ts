@@ -3,18 +3,12 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { HonoMemoryStorage } from "@hono-storage/memory";
 import csvToJson from "convert-csv-to-json";
+import { userInsertSchema, usersTable } from "./db/schemas/users";
+import { db } from "./db/client";
+import { eq, or, like, sql } from "drizzle-orm";
+import { z } from "zod";
 
 const commaCsvToJson = csvToJson.fieldDelimiter(",");
-
-type User = {
-  Name: string;
-  Email: string;
-  Age: string;
-  Country: string;
-  Occupation: string;
-};
-
-let dbObject: User[] = [];
 
 const storage = new HonoMemoryStorage({
   key: (c, file) => `${file.originalname}-${new Date().getTime()}`,
@@ -43,30 +37,53 @@ app.post("/api/files", storage.single("file"), async (c) => {
     const rawCsv = Buffer.from(await file.arrayBuffer()).toString("utf-8");
     jsonContent = commaCsvToJson.csvStringToJson(rawCsv);
 
-    // this could be validated with Zod
-    dbObject = jsonContent as User[];
+    const users = jsonContent
+      .map((user) => {
+        const parsedUser = userInsertSchema.safeParse(user);
+        if (parsedUser.success) {
+          return parsedUser.data;
+        }
+        return null;
+      })
+      .filter((user) => user !== null);
+
+    const result = await db
+      .insert(usersTable)
+      .values([...users])
+      .onConflictDoUpdate({
+        target: usersTable.email,
+        set: { email: sql.raw("email") },
+      })
+      .returning();
 
     return c.json({
       message: "The file was uploaded successfully",
-      content: dbObject,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error(error?.message);
     return c.json({ message: "Error parsing CSV file" }, 500);
   }
 });
 
-app.get("/api/users", ({ req, res, json }) => {
-  const searchTerm = req.query("q");
+const querySchema = z.string().min(1);
 
-  if (!searchTerm) {
-    return json(dbObject);
+app.get("/api/users", async ({ req, res, json }) => {
+  const searchTerm = querySchema.safeParse(req.query("q"));
+  if (!searchTerm.success) {
+    return json({ success: false, message: searchTerm.error.issues }, 500);
   }
 
-  const result = dbObject.filter((user) => {
-    return user.Name.toLocaleLowerCase().includes(
-      searchTerm.toLocaleLowerCase()
+  const result = await db
+    .select()
+    .from(usersTable)
+    .where(
+      or(
+        like(usersTable.name, `%${searchTerm.data?.toLocaleLowerCase()}%`),
+        like(usersTable.email, `%${searchTerm.data?.toLocaleLowerCase()}%`),
+        like(usersTable.country, `%${searchTerm.data?.toLocaleLowerCase()}%`),
+        like(usersTable.occupation, `%${searchTerm.data?.toLocaleLowerCase()}%`)
+      )
     );
-  });
 
   return json({
     data: result,

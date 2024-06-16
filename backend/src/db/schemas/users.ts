@@ -1,3 +1,4 @@
+import { Table } from "drizzle-orm";
 import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -18,9 +19,13 @@ export const usersTable = sqliteTable("users", {
 
 export const usersSchema = createSelectSchema(usersTable);
 
-export const userInsertSchema = createInsertSchema(usersTable).omit({
-  id: true,
-  createdAt: true,
-});
+export const userInsertSchema = createInsertSchema(usersTable)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    age: z.union([z.string(), z.number()]).pipe(z.coerce.number()),
+  });
 
 export type User = z.infer<typeof usersSchema>;

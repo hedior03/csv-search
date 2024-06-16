@@ -6,11 +6,17 @@
   "dependencies": {
     "@hono-storage/memory": "^0.0.12",
     "@hono/node-server": "^1.11.3",
+    "better-sqlite3": "^11.0.0",
     "convert-csv-to-json": "^2.47.0",
-    "hono": "^4.4.6"
+    "drizzle-orm": "^0.31.2",
+    "drizzle-zod": "^0.5.1",
+    "hono": "^4.4.6",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.10",
     "@types/node": "^20.11.17",
+    "drizzle-kit": "^0.22.7",
     "tsx": "^4.7.1"
   }
 }

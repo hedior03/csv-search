@@ -17,10 +17,6 @@ const storage = new HonoMemoryStorage({
 const app = new Hono();
 app.use("/api/*", cors());
 
-app.get("/api/", (c) => {
-  return c.text("Hello Hono!");
-});
-
 app.post("/api/files", storage.single("file"), async (c) => {
   const file = c.var.files.file as File;
 
@@ -46,6 +42,8 @@ app.post("/api/files", storage.single("file"), async (c) => {
         return null;
       })
       .filter((user) => user !== null);
+
+    await db.delete(usersTable);
 
     const result = await db
       .insert(usersTable)

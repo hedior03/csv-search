@@ -1,4 +1,4 @@
-Name,Email,Age,Country,Occupation
+name,email,age,country,occupation
 John Doe,john.doe@example.com,28,USA,Software Engineer
 Jane Smith,jane.smith@example.com,34,Canada,Product Manager
 Sam Wilson,sam.wilson@example.com,22,UK,Designer
